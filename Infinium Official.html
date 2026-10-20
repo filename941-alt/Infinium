@@ -1,0 +1,5113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Infinium — An Endless World of Knowledge</title>
+
+  <style>
+    :root {
+      --bg: #fbfaf7;
+      --panel: #fffefb;
+      --soft: #f5f2e9;
+      --text: #202122;
+      --muted: #6b6b68;
+      --border: #d9d7d0;
+      --link: #0645ad;
+      --link-hover: #3366cc;
+    }
+
+
+    body.dark-mode {
+      --bg: #171716;
+      --panel: #20201e;
+      --text: #f0eee7;
+      --muted: #aaa69c;
+      --border: #44423d;
+      --link: #8eb7ff;
+      --link-hover: #b9d1ff;
+      --soft: #292823;
+    }
+
+    body.dark-mode .topbar {
+      background: rgba(23, 23, 22, 0.97);
+    }
+
+    body.dark-mode .search-form input,
+    body.dark-mode .search-form button,
+    body.dark-mode .search-suggestions,
+    body.dark-mode .suggestion-item,
+    body.dark-mode .category-card,
+    body.dark-mode .quick-topic,
+    body.dark-mode .modal-box,
+    body.dark-mode .form-input,
+    body.dark-mode .article-viewer,
+    body.dark-mode .wiki-card,
+    body.dark-mode .welcome-box {
+      background-color: var(--panel);
+      color: var(--text);
+    }
+
+    body.dark-mode .suggestion-item:hover,
+    body.dark-mode .suggestion-item.active,
+    body.dark-mode .category-card:hover,
+    body.dark-mode .quick-topic:hover {
+      background: #2d2c27;
+    }
+
+    body.dark-mode .wiki-card h2,
+    body.dark-mode .suggestion-footer,
+    body.dark-mode .random-knowledge-box,
+    body.dark-mode .stat {
+      background: #292823;
+    }
+
+    body.dark-mode .suggestion-title,
+    body.dark-mode .category-name,
+    body.dark-mode .brand-name {
+      color: var(--text);
+    }
+
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Cambria, Georgia, "Times New Roman", serif;
+      line-height: 1.58;
+    }
+
+    a {
+      color: var(--link);
+      text-decoration: none;
+    }
+
+    a:hover {
+      color: var(--link-hover);
+      text-decoration: underline;
+    }
+
+    button,
+    input {
+      font-family: Cambria, Georgia, "Times New Roman", serif;
+    }
+
+    /* ==============================
+       HEADER
+    ============================== */
+
+    .topbar {
+      min-height: 80px;
+      display: grid;
+      grid-template-columns: 310px minmax(300px, 720px) 1fr;
+      gap: 28px;
+      align-items: center;
+      padding: 10px 30px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(251, 250, 247, 0.97);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+    }
+
+    .brand {
+      color: #171717;
+      font-size: 34px;
+      font-weight: 700;
+      letter-spacing: -0.9px;
+      line-height: 1;
+    }
+
+    .brand small {
+      display: block;
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.8px;
+    }
+
+    .search-form {
+      display: flex;
+      min-width: 0;
+      position: relative;
+      z-index: 120;
+    }
+
+    .search-form input {
+      width: 100%;
+      min-width: 0;
+      padding: 11px 13px;
+      border: 1px solid #a9a9a5;
+      border-right: none;
+      background: white;
+      color: var(--text);
+      font-size: 16px;
+      outline: none;
+    }
+
+    .search-form input:focus {
+      border-color: #3366cc;
+      box-shadow: inset 0 0 0 1px #3366cc;
+    }
+
+    .search-form button {
+      padding: 11px 21px;
+      border: 1px solid #a9a9a5;
+      background: #f1f1ef;
+      color: #202122;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .search-form button:hover {
+      background: #e8e8e4;
+    }
+
+
+    /* ==============================
+       LIVE SEARCH SUGGESTIONS
+    ============================== */
+
+    .search-suggestions {
+      position: absolute;
+      top: calc(100% + 1px);
+      left: 0;
+      right: 0;
+      z-index: 300;
+
+      display: none;
+
+      max-height: 520px;
+      overflow-y: auto;
+
+      border: 1px solid #a9a9a5;
+      background: #fffefb;
+
+      box-shadow:
+        0 14px 35px rgba(0, 0, 0, 0.16);
+
+      text-align: left;
+    }
+
+    .search-suggestions.show {
+      display: block;
+    }
+
+    .suggestion-loading,
+    .suggestion-empty {
+      padding: 15px 16px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .suggestion-item {
+      width: 100%;
+      min-height: 82px;
+
+      display: grid;
+      grid-template-columns: 76px minmax(0, 1fr);
+      gap: 14px;
+      align-items: center;
+
+      padding: 8px 14px 8px 8px;
+
+      border: 0;
+      border-bottom: 1px solid var(--border);
+
+      background: #fffefb;
+      color: var(--text);
+
+      font-family: Cambria, Georgia, "Times New Roman", serif;
+      text-align: left;
+
+      cursor: pointer;
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: 0;
+    }
+
+    .suggestion-item:hover,
+    .suggestion-item.active {
+      background: #f1eee4;
+    }
+
+    .suggestion-thumb {
+      width: 76px;
+      height: 66px;
+      object-fit: cover;
+
+      display: block;
+
+      border: 1px solid #d3d0c7;
+      background: #eeeae0;
+    }
+
+    .suggestion-thumb-fallback {
+      width: 76px;
+      height: 66px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border: 1px solid #d3d0c7;
+      background:
+        linear-gradient(135deg, #ece7db, #f8f6ef);
+
+      color: #77736b;
+      font-size: 30px;
+      font-weight: 700;
+    }
+
+    .suggestion-text {
+      min-width: 0;
+    }
+
+    .suggestion-title {
+      display: block;
+
+      margin-bottom: 4px;
+
+      color: #252525;
+      font-size: 19px;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+
+    .suggestion-description {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+
+      overflow: hidden;
+
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .suggestion-footer {
+      padding: 10px 14px;
+
+      border-top: 1px solid var(--border);
+      background: #f8f6ef;
+
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 620px) {
+      .suggestion-item {
+        grid-template-columns: 58px minmax(0, 1fr);
+        min-height: 70px;
+      }
+
+      .suggestion-thumb,
+      .suggestion-thumb-fallback {
+        width: 58px;
+        height: 54px;
+      }
+
+      .suggestion-title {
+        font-size: 17px;
+      }
+    }
+
+
+    .account-links {
+      justify-self: end;
+      display: flex;
+      gap: 16px;
+      font-size: 14px;
+    }
+
+    /* ==============================
+       LAYOUT
+    ============================== */
+
+    .layout {
+      width: min(1480px, 96%);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 210px minmax(0, 1fr) 220px;
+      gap: 36px;
+      padding: 36px 0 80px;
+    }
+
+    main { min-width: 0; }
+
+    .sidebar,
+
+
+    /* ==============================
+       INFINIUM IDENTITY + ACCOUNT UI
+    ============================== */
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .brand-symbol {
+      width: 44px;
+      height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+
+      border: 1px solid var(--border);
+      border-radius: 50%;
+
+      color: #67563f;
+      background:
+        radial-gradient(circle at 35% 30%, #fffdf7, #eee8dc);
+
+      font-family: Cambria, Georgia, serif;
+      font-size: 35px;
+      font-weight: 700;
+      line-height: 1;
+
+      box-shadow:
+        inset 0 0 0 3px rgba(255,255,255,0.35);
+    }
+
+    body.dark-mode .brand-symbol {
+      color: #e4d5bb;
+      background:
+        radial-gradient(circle at 35% 30%, #3a3730, #211f1b);
+    }
+
+    .brand-copy {
+      min-width: 0;
+    }
+
+    .brand-name {
+      display: block;
+      color: #171717;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.7px;
+      line-height: 1;
+    }
+
+    .brand small {
+      margin-top: 5px;
+    }
+
+    .account-links {
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .header-action {
+      border: 0;
+      padding: 4px 0;
+      background: transparent;
+      color: var(--link);
+      font-family: Cambria, Georgia, serif;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .header-action:hover {
+      color: var(--link-hover);
+      text-decoration: underline;
+    }
+
+    .header-user {
+      display: none;
+      align-items: center;
+      gap: 7px;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .header-user.show {
+      display: inline-flex;
+    }
+
+    .settings-gear {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      background: var(--panel);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 17px;
+    }
+
+    .settings-gear:hover {
+      background: var(--soft);
+    }
+
+    /* ==============================
+       CATEGORY IMAGES
+    ============================== */
+
+    .category-card {
+      padding: 0;
+      overflow: hidden;
+      justify-content: flex-start;
+    }
+
+    .category-image-wrap {
+      width: 100%;
+      height: 108px;
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(135deg, #e7e0d2, #f7f4ec);
+      border-bottom: 1px solid var(--border);
+    }
+
+    body.dark-mode .category-image-wrap {
+      background:
+        linear-gradient(135deg, #2b2924, #1d1c19);
+    }
+
+    .category-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .category-image.loaded {
+      opacity: 1;
+    }
+
+    .category-card:hover .category-image {
+      transform: scale(1.035);
+    }
+
+    .category-image-fallback {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      color: #786f62;
+      font-size: 36px;
+      font-weight: 700;
+    }
+
+    .category-body {
+      padding: 13px 15px 15px;
+    }
+
+    .category-icon {
+      display: inline-block;
+      margin-right: 6px;
+      margin-bottom: 4px;
+      font-size: 19px;
+    }
+
+    .category-name {
+      display: inline;
+    }
+
+
+
+    /* ==============================
+       PASSWORD VISIBILITY
+    ============================== */
+
+    .password-field {
+      position: relative;
+      margin: 7px 0;
+    }
+
+    .password-field .form-input {
+      margin: 0;
+      padding-right: 74px;
+    }
+
+    .password-visibility {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+
+      min-width: 48px;
+      padding: 5px 8px;
+
+      border: 0;
+      border-left: 1px solid var(--border);
+      background: transparent;
+
+      color: var(--muted);
+
+      font-family: Cambria, Georgia, serif;
+      font-size: 13px;
+      font-weight: 700;
+
+      cursor: pointer;
+    }
+
+    .password-visibility:hover {
+      color: var(--text);
+    }
+
+    .password-visibility:focus-visible {
+      outline: 2px solid #67563f;
+      outline-offset: 2px;
+    }
+
+    /* ==============================
+       INFINIUM CENTERED HOME
+    ============================== */
+
+    .infinium-home {
+      min-height: calc(100vh - 68px);
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 70px 22px 90px;
+      background:
+        radial-gradient(
+          circle at 50% 28%,
+          rgba(125, 99, 65, 0.07),
+          transparent 36%
+        ),
+        var(--bg);
+    }
+
+    .infinium-home.show {
+      display: flex;
+    }
+
+    .infinium-home-inner {
+      width: min(760px, 100%);
+      margin-top: 7vh;
+      text-align: center;
+    }
+
+    .infinium-home-symbol {
+      width: 90px;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 15px;
+
+      border: 1px solid var(--border);
+      border-radius: 50%;
+
+      background:
+        radial-gradient(
+          circle at 35% 28%,
+          #fffdf7,
+          #eee7da
+        );
+
+      color: #67563f;
+      font-size: 70px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    body.dark-mode .infinium-home-symbol {
+      background:
+        radial-gradient(
+          circle at 35% 28%,
+          #3a3730,
+          #211f1b
+        );
+      color: #e4d5bb;
+    }
+
+    .infinium-home-title {
+      margin: 0;
+      color: var(--text);
+      font-size: clamp(58px, 10vw, 96px);
+      font-weight: 400;
+      line-height: 0.95;
+      letter-spacing: -2px;
+    }
+
+    .infinium-home-tagline {
+      margin: 14px 0 34px;
+      color: var(--muted);
+      font-size: 18px;
+      letter-spacing: 0.35px;
+    }
+
+    .home-search-shell {
+      width: min(680px, 100%);
+      margin: 0 auto;
+    }
+
+    .home-search-form {
+      display: flex;
+      width: 100%;
+    }
+
+    .home-search-form input {
+      width: 100%;
+      min-width: 0;
+      padding: 15px 16px;
+
+      border: 1px solid #aaa59a;
+      border-right: 0;
+
+      background: var(--panel);
+      color: var(--text);
+
+      font-family: Cambria, Georgia, serif;
+      font-size: 18px;
+      outline: none;
+    }
+
+    .home-search-form input:focus {
+      border-color: #67563f;
+      box-shadow: inset 0 0 0 1px #67563f;
+    }
+
+    .home-search-form button {
+      min-width: 108px;
+      border: 1px solid #67563f;
+      background: #67563f;
+      color: white;
+
+      font-family: Cambria, Georgia, serif;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .home-search-note {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .home-shortcuts {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 27px;
+    }
+
+    .home-shortcut {
+      padding: 7px 11px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+
+      background: var(--panel);
+      color: var(--link);
+
+      font-family: Cambria, Georgia, serif;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .home-shortcut:hover {
+      background: var(--soft);
+    }
+
+    .encyclopedia-view.hidden-view {
+      display: none;
+    }
+
+    @media (max-width: 760px) {
+      .infinium-home {
+        min-height: auto;
+        padding-top: 44px;
+      }
+
+      .infinium-home-inner {
+        margin-top: 0;
+      }
+
+      .home-search-form button {
+        min-width: 84px;
+      }
+    }
+
+    /* ==============================
+       MODALS
+    ============================== */
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+
+      align-items: center;
+      justify-content: center;
+
+      padding: 22px;
+      background: rgba(0,0,0,0.58);
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-box {
+      width: min(440px, 100%);
+      max-height: calc(100vh - 44px);
+      overflow-y: auto;
+
+      position: relative;
+
+      padding: 28px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+
+      box-shadow: 0 24px 70px rgba(0,0,0,0.28);
+    }
+
+    .modal-box h2 {
+      margin: 0 0 7px;
+      padding-bottom: 7px;
+      border-bottom: 1px solid var(--border);
+      font-size: 27px;
+      font-weight: 400;
+    }
+
+    .modal-box p {
+      color: var(--muted);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+
+      border: 0;
+      background: transparent;
+      color: var(--text);
+
+      font-size: 27px;
+      cursor: pointer;
+    }
+
+    .form-input {
+      width: 100%;
+      margin: 7px 0;
+      padding: 11px 12px;
+
+      border: 1px solid #aaa59a;
+      background: #fff;
+      color: var(--text);
+
+      font-family: Cambria, Georgia, serif;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .form-input:focus {
+      border-color: #3366cc;
+      box-shadow: inset 0 0 0 1px #3366cc;
+    }
+
+    .primary-button,
+    .secondary-button,
+    .danger-button {
+      width: 100%;
+      margin-top: 12px;
+      padding: 10px 14px;
+
+      font-family: Cambria, Georgia, serif;
+      font-size: 15px;
+      font-weight: 700;
+
+      cursor: pointer;
+    }
+
+    .primary-button {
+      border: 1px solid #67563f;
+      background: #67563f;
+      color: #fff;
+    }
+
+    .secondary-button {
+      border: 1px solid var(--border);
+      background: var(--soft);
+      color: var(--text);
+    }
+
+    .danger-button {
+      border: 1px solid #9b3d3d;
+      background: transparent;
+      color: #9b3d3d;
+    }
+
+    .form-message {
+      min-height: 22px;
+      margin-top: 10px;
+      color: #8a5a20;
+      font-size: 14px;
+    }
+
+    .settings-section {
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 1px solid var(--border);
+    }
+
+    .settings-section h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .theme-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 9px;
+    }
+
+    .theme-choice {
+      padding: 12px;
+      border: 1px solid var(--border);
+      background: var(--soft);
+      color: var(--text);
+      font-family: Cambria, Georgia, serif;
+      cursor: pointer;
+    }
+
+    .theme-choice.active {
+      outline: 2px solid #8b7655;
+      outline-offset: 1px;
+    }
+
+    .settings-account {
+      padding: 12px;
+      background: var(--soft);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    @media (max-width: 760px) {
+      .brand {
+        justify-content: center;
+      }
+
+      .account-links {
+        justify-content: center;
+      }
+
+      .category-image-wrap {
+        height: 135px;
+      }
+    }
+
+    /* ==============================
+       EXPLORE EVERYTHING
+    ============================== */
+
+    .everything-section {
+      margin-top: 38px;
+    }
+
+    .everything-section h2 {
+      margin: 0 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #a2a9b1;
+
+      font-size: 28px;
+      font-weight: 400;
+    }
+
+    .everything-intro {
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns:
+        repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
+    }
+
+    .category-card {
+      min-height: 88px;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
+      padding: 14px 16px;
+
+      border: 1px solid var(--border);
+      background: var(--panel);
+
+      color: var(--text);
+      text-align: left;
+      font-family: Cambria, Georgia, "Times New Roman", serif;
+
+      cursor: pointer;
+
+      transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        transform 0.2s ease;
+    }
+
+    .category-card:hover {
+      border-color: #a8a39a;
+      background: #f7f3e8;
+      transform: translateY(-2px);
+    }
+
+    .category-icon {
+      margin-bottom: 5px;
+      font-size: 23px;
+      line-height: 1;
+    }
+
+    .category-name {
+      color: #202122;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .category-note {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .quick-topic-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .quick-topic {
+      padding: 7px 10px;
+
+      border: 1px solid #c9c5bb;
+      border-radius: 999px;
+
+      background: #fffefb;
+      color: var(--link);
+
+      font-family: Cambria, Georgia, serif;
+      font-size: 13px;
+
+      cursor: pointer;
+    }
+
+    .quick-topic:hover {
+      background: #f1eee4;
+    }
+
+    .random-knowledge-box {
+      margin-top: 24px;
+      padding: 18px;
+
+      border: 1px solid var(--border);
+      background: #f8f6ef;
+    }
+
+    .random-knowledge-box strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 18px;
+    }
+
+    .random-button {
+      margin-top: 10px;
+      padding: 8px 13px;
+
+      border: 1px solid #aaa59a;
+      background: #fff;
+      color: #202122;
+
+      font-family: Cambria, Georgia, serif;
+      font-weight: 700;
+
+      cursor: pointer;
+    }
+
+    .random-button:hover {
+      background: #f1eee4;
+    }
+
+
+    .contents {
+      color: #454545;
+      font-size: 14px;
+      position: sticky;
+      top: 110px;
+      align-self: start;
+    }
+
+    .side-title {
+      margin-bottom: 10px;
+      padding-bottom: 7px;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .sidebar a,
+    .contents a {
+      display: block;
+      padding: 5px 0;
+    }
+
+    /* ==============================
+       HOME
+    ============================== */
+
+    .page-title {
+      margin: 0;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #a2a9b1;
+      font-size: clamp(38px, 5vw, 56px);
+      font-weight: 400;
+      line-height: 1.05;
+    }
+
+    .subtitle {
+      margin: 9px 0 28px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .welcome-box {
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 26px;
+      margin-bottom: 30px;
+      padding: 25px 27px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+    }
+
+    .welcome-box h2 {
+      margin: 0 0 9px;
+      font-size: 28px;
+      font-weight: 400;
+    }
+
+    .welcome-box p { margin: 0; }
+
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      align-content: start;
+    }
+
+    .stat {
+      padding: 13px;
+      border: 1px solid #dfddd6;
+      background: var(--soft);
+      text-align: center;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 20px;
+    }
+
+    /* ==============================
+       SEARCH RESULTS
+    ============================== */
+
+    .search-area {
+      display: none;
+      margin: 0 0 34px;
+    }
+
+    .search-area.show { display: block; }
+
+    .search-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+      padding-bottom: 7px;
+      border-bottom: 1px solid #a2a9b1;
+    }
+
+    .search-heading h2 {
+      margin: 0;
+      font-size: 29px;
+      font-weight: 400;
+    }
+
+    .search-meta {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status-box {
+      padding: 18px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--muted);
+    }
+
+    .results-list {
+      display: grid;
+      gap: 13px;
+    }
+
+    .result-card {
+      padding: 18px 19px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+    }
+
+    .result-card h3 {
+      margin: 0 0 7px;
+      font-size: 23px;
+      font-weight: 700;
+    }
+
+    .result-card p {
+      margin: 0 0 9px;
+      color: #3d3d3b;
+    }
+
+    .result-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 10px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .source-note {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* ==============================
+       ARTICLE VIEWER
+    ============================== */
+
+    .article-viewer {
+      display: none;
+      margin-bottom: 34px;
+      padding: 24px 26px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+    }
+
+    .article-viewer.show { display: block; }
+
+    .article-viewer h2 {
+      margin: 0 0 5px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #a2a9b1;
+      font-size: 34px;
+      font-weight: 400;
+    }
+
+    .article-viewer p {
+      font-size: 16px;
+    }
+
+    .article-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .article-controls button {
+      padding: 9px 13px;
+      border: 1px solid #a9a9a5;
+      background: #f5f5f2;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    /* ==============================
+       CARDS
+    ============================== */
+
+    .columns {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 26px;
+    }
+
+    .wiki-card {
+      border: 1px solid var(--border);
+      background: var(--panel);
+    }
+
+    .wiki-card h2 {
+      margin: 0;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      background: #f1efe8;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .wiki-card .body { padding: 16px 18px; }
+
+    .wiki-card p:first-child { margin-top: 0; }
+
+    .wiki-card ul { padding-left: 22px; }
+
+    .article-section { margin-top: 34px; }
+
+    .article-section h2 {
+      margin: 0 0 14px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid #a2a9b1;
+      font-size: 28px;
+      font-weight: 400;
+    }
+
+    .article-list {
+      columns: 2;
+      column-gap: 42px;
+    }
+
+    .article-list a {
+      display: block;
+      break-inside: avoid;
+      margin-bottom: 8px;
+    }
+
+    footer {
+      padding: 24px 5%;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    @media (max-width: 1080px) {
+      .layout { grid-template-columns: 190px minmax(0, 1fr); }
+      .contents { display: none; }
+      .topbar { grid-template-columns: 250px minmax(230px, 1fr); }
+      .account-links { display: none; }
+    }
+
+    @media (max-width: 760px) {
+      .topbar {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        position: static;
+      }
+
+      .brand { text-align: center; }
+
+      .layout {
+        width: min(94%, 760px);
+        grid-template-columns: 1fr;
+        padding-top: 24px;
+      }
+
+      .sidebar {
+        position: static;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 16px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .side-title { width: 100%; }
+      .sidebar a { padding: 0; }
+      .welcome-box,
+      .columns { grid-template-columns: 1fr; }
+      .article-list { columns: 1; }
+    }
+  
+    /* ==============================
+       SERIOUS INFINIUM EXPERIENCE
+    ============================== */
+
+    .settings-gear {
+      width: auto;
+      height: auto;
+      min-width: 70px;
+      padding: 8px 11px;
+      border-radius: 0;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .header-user {
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      font-family: Cambria, Georgia, serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .header-user:hover {
+      text-decoration: underline;
+    }
+
+    .category-code {
+      display: inline-block;
+      min-width: 28px;
+      margin-right: 6px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.3px;
+      vertical-align: 2px;
+    }
+
+    .home-secondary-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .quiet-button {
+      padding: 8px 13px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      font-family: Cambria, Georgia, serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .quiet-button:hover {
+      background: var(--soft);
+    }
+
+    .home-dashboard {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 36px;
+      text-align: left;
+    }
+
+    .dashboard-card {
+      min-height: 180px;
+      padding: 17px 18px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+    }
+
+    .dashboard-card h2 {
+      margin: 0 0 10px;
+      padding-bottom: 7px;
+      border-bottom: 1px solid var(--border);
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .dashboard-card p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .dashboard-list {
+      display: grid;
+      gap: 7px;
+    }
+
+    .dashboard-link {
+      width: 100%;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--link);
+      font-family: Cambria, Georgia, serif;
+      font-size: 14px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .dashboard-link:hover {
+      text-decoration: underline;
+    }
+
+    .dashboard-empty {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .article-viewer {
+      max-width: 980px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    body.reading-narrow .article-viewer {
+      max-width: 760px;
+    }
+
+    body.reading-wide .article-viewer {
+      max-width: 1180px;
+    }
+
+    body.font-small .article-viewer p,
+    body.font-small .article-viewer li {
+      font-size: 14px;
+    }
+
+    body.font-large .article-viewer p,
+    body.font-large .article-viewer li {
+      font-size: 18px;
+    }
+
+    .article-kicker {
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .article-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 260px;
+      gap: 26px;
+      align-items: start;
+    }
+
+    .article-image {
+      width: 100%;
+      max-height: 310px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      background: var(--soft);
+      display: none;
+    }
+
+    .article-image.show {
+      display: block;
+    }
+
+    .article-meta {
+      margin: 3px 0 14px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .article-controls .save-article.saved {
+      background: #67563f;
+      border-color: #67563f;
+      color: white;
+    }
+
+    body.dark-mode .article-controls button {
+      background: var(--soft);
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    .knowledge-path,
+    .continue-exploring {
+      margin-top: 25px;
+      padding-top: 17px;
+      border-top: 1px solid var(--border);
+    }
+
+    .knowledge-path h3,
+    .continue-exploring h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+
+    .path-row,
+    .related-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .path-part,
+    .related-topic {
+      border: 1px solid var(--border);
+      background: var(--soft);
+      color: var(--text);
+      padding: 6px 9px;
+      font-family: Cambria, Georgia, serif;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .path-separator {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .profile-list {
+      display: grid;
+      gap: 7px;
+      margin-top: 9px;
+    }
+
+    .profile-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    .profile-item button {
+      border: 0;
+      background: transparent;
+      color: var(--link);
+      font-family: Cambria, Georgia, serif;
+      cursor: pointer;
+    }
+
+    .setting-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .setting-choice-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .setting-choice {
+      padding: 9px 10px;
+      border: 1px solid var(--border);
+      background: var(--soft);
+      color: var(--text);
+      font-family: Cambria, Georgia, serif;
+      cursor: pointer;
+    }
+
+    .setting-choice.active {
+      outline: 2px solid #8b7655;
+      outline-offset: 1px;
+    }
+
+    .settings-select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      font-family: Cambria, Georgia, serif;
+      font-size: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .home-dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      .article-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .article-image {
+        max-width: 420px;
+      }
+    }
+
+
+    /* ==============================
+       ACTION FEEDBACK
+    ============================== */
+
+    .infinium-toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 2000;
+      max-width: min(380px, calc(100vw - 48px));
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      box-shadow: 0 14px 40px rgba(0,0,0,0.18);
+      font-family: Cambria, Georgia, serif;
+      font-size: 14px;
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .infinium-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .source-disabled {
+      opacity: 0.5;
+      pointer-events: none;
+      cursor: default;
+    }
+
+
+    /* ==============================
+       SECTION NAVIGATION DOTS
+    ============================== */
+
+    .section-dots {
+      position: fixed;
+      top: 50%;
+      right: 22px;
+      z-index: 850;
+
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+
+      transform: translateY(-50%);
+    }
+
+    .section-dot {
+      position: relative;
+
+      width: 12px;
+      height: 12px;
+
+      padding: 0;
+
+      border: 1px solid #8f897f;
+      border-radius: 50%;
+
+      background: var(--panel);
+
+      cursor: pointer;
+
+      transition:
+        background 0.18s ease,
+        border-color 0.18s ease,
+        transform 0.18s ease;
+    }
+
+    .section-dot:hover {
+      transform: scale(1.08);
+      border-color: #675f54;
+    }
+
+    .section-dot.active {
+      background: #746857;
+      border-color: #746857;
+    }
+
+    body.dark-mode .section-dot {
+      background: #211f1c;
+      border-color: #777269;
+    }
+
+    body.dark-mode .section-dot.active {
+      background: #c3b69f;
+      border-color: #c3b69f;
+    }
+
+    .section-dot-label {
+      position: absolute;
+      top: 50%;
+      right: 20px;
+
+      min-width: max-content;
+
+      padding: 4px 8px;
+
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+
+      font-family: Cambria, Georgia, serif;
+      font-size: 12px;
+      line-height: 1;
+
+      opacity: 0;
+      pointer-events: none;
+
+      transform:
+        translateY(-50%)
+        translateX(4px);
+
+      transition:
+        opacity 0.16s ease,
+        transform 0.16s ease;
+    }
+
+    .section-dot:hover .section-dot-label,
+    .section-dot:focus-visible .section-dot-label {
+      opacity: 1;
+
+      transform:
+        translateY(-50%)
+        translateX(0);
+    }
+
+    .section-dot:focus-visible {
+      outline: 2px solid #8a7d68;
+      outline-offset: 4px;
+    }
+
+    @media (max-width: 900px) {
+      .section-dots {
+        display: none;
+      }
+    }
+
+
+</style>
+</head>
+
+<body>
+
+  <header class="topbar">
+
+    <a class="brand" href="#" onclick="showHomeMenu(event)" aria-label="Infinium home">
+      <span class="brand-symbol" aria-hidden="true">∞</span>
+      <span class="brand-copy">
+        <span class="brand-name">Infinium</span>
+        <small>An Endless World of Knowledge</small>
+      </span>
+    </a>
+
+    <form class="search-form" id="searchForm">
+      <input
+        id="searchInput"
+        type="search"
+        placeholder="Search almost anything..."
+        aria-label="Search Infinium"
+        autocomplete="off"
+        role="combobox"
+        aria-autocomplete="list"
+        aria-expanded="false"
+        aria-controls="searchSuggestions">
+
+      <button type="submit">Search</button>
+
+      <div
+        class="search-suggestions"
+        id="searchSuggestions"
+        role="listbox"
+        aria-label="Search suggestions">
+      </div>
+    </form>
+
+    <div class="account-links">
+      <button class="header-action" id="createAccountButton" type="button" onclick="openSignup()">Sign In</button>
+      <button class="header-action" id="loginButton" type="button" onclick="openLogin()">Log in</button>
+
+      <button class="header-user" id="headerUser" type="button" onclick="openProfile()">
+        <span id="headerUsername"></span>
+      </button>
+
+      <button
+        class="settings-gear"
+        type="button"
+        onclick="openSettings()"
+        title="Settings"
+        aria-label="Open settings">Settings</button>
+    </div>
+
+  </header>
+
+  <!-- =================================
+       INFINIUM HOME
+  ================================== -->
+
+  <section class="infinium-home show" id="infiniumHome">
+
+    <div class="infinium-home-inner">
+
+      <div class="infinium-home-symbol" aria-hidden="true">
+        ∞
+      </div>
+
+      <h1 class="infinium-home-title">
+        Infinium
+      </h1>
+
+      <div class="infinium-home-tagline">
+        An Endless World of Knowledge
+      </div>
+
+      <div class="home-search-shell">
+
+        <form
+          class="home-search-form"
+          id="homeSearchForm">
+
+          <input
+            id="homeSearchInput"
+            type="search"
+            placeholder="Search anything..."
+            autocomplete="off"
+            aria-label="Search Infinium">
+
+          <button type="submit">
+            Search
+          </button>
+
+        </form>
+
+      </div>
+
+      <div class="home-search-note">
+        Search people, games, places, history, science, movies, music, and more.
+      </div>
+
+      <div class="home-secondary-actions">
+        <button class="quiet-button" type="button" onclick="openRandomArticle()">Random Article</button>
+      </div>
+
+      <div class="home-shortcuts">
+        <button type="button" class="home-shortcut" onclick="homeQuickSearch('Video games')">Games</button>
+        <button type="button" class="home-shortcut" onclick="homeQuickSearch('Biographies')">Biographies</button>
+        <button type="button" class="home-shortcut" onclick="homeQuickSearch('Science')">Science</button>
+        <button type="button" class="home-shortcut" onclick="homeQuickSearch('History')">History</button>
+        <button type="button" class="home-shortcut" onclick="homeQuickSearch('Technology')">Technology</button>
+        <button type="button" class="home-shortcut" onclick="homeQuickSearch('Space')">Space</button>
+      </div>
+
+      <div class="home-dashboard">
+
+        <section class="dashboard-card">
+          <h2>Daily Knowledge</h2>
+          <p id="dailyKnowledgeSummary">A selected subject for today.</p>
+          <button class="dashboard-link" id="dailyKnowledgeTitle" type="button">Open today's article</button>
+        </section>
+
+        <section class="dashboard-card">
+          <h2>Recent Searches</h2>
+          <div class="dashboard-list" id="homeHistoryList"></div>
+          <button class="quiet-button" type="button" onclick="clearSearchHistory()">Clear History</button>
+        </section>
+
+        <section class="dashboard-card">
+          <h2>Saved Articles</h2>
+          <div class="dashboard-list" id="homeSavedList"></div>
+          <button class="quiet-button" type="button" onclick="openProfile()">View Profile</button>
+        </section>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+
+  <div class="encyclopedia-view hidden-view" id="encyclopediaView">
+  <div class="layout">
+
+    <aside class="sidebar">
+      <div class="side-title">Navigation</div>
+      <a href="#main-page">Main page</a>
+      <a href="#featured">Featured content</a>
+      <a href="#recent">Recently added</a>
+      <a href="#topics">Explore topics</a>
+      <a href="#about">About Infinium</a>
+
+      <div class="side-title" style="margin-top:24px;">Quick search</div>
+      <a href="#" data-search="Science">Science</a>
+      <a href="#" data-search="History">History</a>
+      <a href="#" data-search="Technology">Technology</a>
+      <a href="#" data-search="Cybersecurity">Cybersecurity</a>
+      <a href="#" data-search="Space">Space</a>
+    </aside>
+
+
+    <main id="main-page">
+
+      <h1 class="page-title">Welcome to Infinium</h1>
+
+      <div class="subtitle">
+        An Endless World of Knowledge
+      </div>
+
+
+      <section class="search-area" id="searchArea">
+
+        <div class="search-heading">
+          <h2 id="searchTitle">Search results</h2>
+          <div class="search-meta" id="searchMeta"></div>
+        </div>
+
+        <div id="searchResults"></div>
+
+        <div class="source-note">
+          Search results are provided by the selected Wikipedia language edition.
+        </div>
+
+      </section>
+
+
+      <section class="article-viewer" id="articleViewer">
+
+        <div class="article-kicker">Infinium Article</div>
+
+        <div class="article-layout">
+
+          <div>
+            <h2 id="articleTitle"></h2>
+            <div class="article-meta" id="articleMeta"></div>
+            <p id="articleExtract"></p>
+          </div>
+
+          <img
+            class="article-image"
+            id="articleImage"
+            alt="">
+
+        </div>
+
+        <div class="article-controls">
+          <button class="save-article" type="button" id="saveArticleButton">Save Article</button>
+          <button type="button" id="closeArticle">Close Article</button>
+          <a id="sourceArticle" class="source-disabled" href="#" target="_blank" rel="noopener" aria-disabled="true">View Source Article</a>
+        </div>
+
+        <div class="knowledge-path">
+          <h3>Infinium Knowledge Path</h3>
+          <div class="path-row" id="knowledgePath"></div>
+        </div>
+
+        <div class="continue-exploring">
+          <h3>Continue Exploring</h3>
+          <div class="related-row" id="relatedArticles"></div>
+        </div>
+
+      </section>
+
+
+      <section class="welcome-box">
+
+        <div>
+          <h2>Knowledge without end.</h2>
+
+          <p>
+            Search for almost any encyclopedia topic, explore related subjects,
+            and discover something new. Infinium keeps the calm, classic feel of
+            a traditional encyclopedia while connecting to a huge public knowledge source.
+          </p>
+        </div>
+
+        <div class="quick-stats">
+          <div class="stat"><strong>Millions</strong>of articles</div>
+          <div class="stat"><strong>Global</strong>topics</div>
+          <div class="stat"><strong>Live</strong>search</div>
+          <div class="stat"><strong>∞</strong>curiosity</div>
+        </div>
+
+      </section>
+
+
+      <div class="columns">
+
+        <section class="wiki-card" id="featured">
+          <h2>Featured article</h2>
+
+          <div class="body">
+            <p>
+              <strong>Knowledge</strong> is information, understanding, or skill
+              gained through experience, education, discovery, and study.
+            </p>
+
+            <p>
+              Infinium is designed around the idea that one topic should always
+              lead naturally to another.
+            </p>
+
+            <a href="#" data-search="Knowledge">Explore knowledge →</a>
+          </div>
+        </section>
+
+
+        <section class="wiki-card">
+          <h2>Did you know?</h2>
+
+          <div class="body">
+            <ul>
+              <li>You can search millions of encyclopedia topics.</li>
+              <li>Each result can be opened without leaving the Infinium layout.</li>
+              <li>You can still open the original source article when needed.</li>
+              <li>Later, Infinium can have its own article database and editors.</li>
+            </ul>
+          </div>
+        </section>
+
+
+        <section class="wiki-card" id="recent">
+          <h2>Explore something</h2>
+
+          <div class="body">
+            <p><a href="#" data-search="History of the Internet">History of the Internet</a></p>
+            <p><a href="#" data-search="Cryptography">Cryptography</a></p>
+            <p><a href="#" data-search="Ancient civilizations">Ancient civilizations</a></p>
+            <p><a href="#" data-search="Solar System">Solar System</a></p>
+            <p><a href="#" data-search="Artificial intelligence">Artificial intelligence</a></p>
+          </div>
+        </section>
+
+
+        <section class="wiki-card">
+          <h2>Search ideas</h2>
+
+          <div class="body">
+            <p>Try searching for a person, place, scientific idea, historical event, technology, animal, country, invention, or almost any encyclopedia subject.</p>
+          </div>
+        </section>
+
+      </div>
+
+
+      <section class="article-section" id="topics">
+        <h2>Explore by topic</h2>
+
+        <div class="article-list">
+          <a href="#" data-search="Science">Science</a>
+          <a href="#" data-search="Mathematics">Mathematics</a>
+          <a href="#" data-search="Technology">Technology</a>
+          <a href="#" data-search="Cybersecurity">Cybersecurity</a>
+          <a href="#" data-search="Computer science">Computer science</a>
+          <a href="#" data-search="History">History</a>
+          <a href="#" data-search="Geography">Geography</a>
+          <a href="#" data-search="Countries of the world">Countries and places</a>
+          <a href="#" data-search="Arts">Arts and culture</a>
+          <a href="#" data-search="Language">Languages</a>
+          <a href="#" data-search="Biography">Biographies</a>
+          <a href="#" data-search="Philosophy">Philosophy</a>
+        </div>
+      </section>
+
+
+  
+    <section class="everything-section" id="everything">
+      <h2>Explore everything</h2>
+
+      <p class="everything-intro">
+        Browse broad areas of knowledge. Each category searches Infinium's
+        encyclopedia source, so you are not limited to only the examples shown here.
+      </p>
+
+      <div class="category-grid">
+
+        <button class="category-card" type="button" onclick="browseCategory('Video games')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="Video game"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">G</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">Games</span>
+            <span class="category-note">Video games, game series, studios, characters, consoles</span>
+          </span>
+        </button>
+
+        <button class="category-card" type="button" onclick="browseCategory('Biographies')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="Biography"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">B</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">Biographies</span>
+            <span class="category-note">People, leaders, scientists, artists, athletes, creators</span>
+          </span>
+        </button>
+
+        <button class="category-card" type="button" onclick="browseCategory('Films television')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="Film"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">M</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">Movies & TV</span>
+            <span class="category-note">Films, television, actors, directors, series</span>
+          </span>
+        </button>
+
+        <button class="category-card" type="button" onclick="browseCategory('Music')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="Music"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">M</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">Music</span>
+            <span class="category-note">Artists, albums, songs, instruments, genres</span>
+          </span>
+        </button>
+
+        <button class="category-card" type="button" onclick="browseCategory('Sports')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="Sport"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">S</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">Sports</span>
+            <span class="category-note">Sports, teams, players, competitions, records</span>
+          </span>
+        </button>
+
+        <button class="category-card" type="button" onclick="browseCategory('Science')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="Science"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">S</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">Science</span>
+            <span class="category-note">Physics, chemistry, biology, discoveries</span>
+          </span>
+        </button>
+
+        <button class="category-card" type="button" onclick="browseCategory('History')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="History"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">H</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">History</span>
+            <span class="category-note">Civilizations, wars, events, eras, archaeology</span>
+          </span>
+        </button>
+
+        <button class="category-card" type="button" onclick="browseCategory('Technology')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="Technology"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">T</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">Technology</span>
+            <span class="category-note">Computers, software, engineering, internet, AI</span>
+          </span>
+        </button>
+
+        <button class="category-card" type="button" onclick="browseCategory('Geography')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="Geography"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">G</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">Geography</span>
+            <span class="category-note">Countries, cities, oceans, mountains, regions</span>
+          </span>
+        </button>
+
+        <button class="category-card" type="button" onclick="browseCategory('Art')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="Art"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">A</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">Art</span>
+            <span class="category-note">Artists, painting, sculpture, design, architecture</span>
+          </span>
+        </button>
+
+        <button class="category-card" type="button" onclick="browseCategory('Literature')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="Literature"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">L</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">Literature</span>
+            <span class="category-note">Books, writers, poetry, novels, literary history</span>
+          </span>
+        </button>
+
+        <button class="category-card" type="button" onclick="browseCategory('Animals')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="Animal"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">A</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">Animals</span>
+            <span class="category-note">Species, wildlife, evolution, habitats</span>
+          </span>
+        </button>
+
+        <button class="category-card" type="button" onclick="browseCategory('Astronomy space')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="Astronomy"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">S</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">Space</span>
+            <span class="category-note">Planets, stars, galaxies, missions, astronomy</span>
+          </span>
+        </button>
+
+        <button class="category-card" type="button" onclick="browseCategory('Food cuisine')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="Food"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">F</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">Food</span>
+            <span class="category-note">Cuisine, dishes, ingredients, cooking traditions</span>
+          </span>
+        </button>
+
+        <button class="category-card" type="button" onclick="browseCategory('Mythology')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="Mythology"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">M</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">Mythology</span>
+            <span class="category-note">Myths, legends, folklore, gods, ancient stories</span>
+          </span>
+        </button>
+
+        <button class="category-card" type="button" onclick="browseCategory('Philosophy')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="Philosophy"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">P</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">Philosophy</span>
+            <span class="category-note">Ideas, thinkers, ethics, logic, schools of thought</span>
+          </span>
+        </button>
+
+        <button class="category-card" type="button" onclick="browseCategory('Medicine health')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="Medicine"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">M</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">Medicine</span>
+            <span class="category-note">Medicine, anatomy, diseases, treatments, health history</span>
+          </span>
+        </button>
+
+        <button class="category-card" type="button" onclick="browseCategory('Mathematics')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="Mathematics"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">M</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">Mathematics</span>
+            <span class="category-note">Numbers, algebra, geometry, statistics, mathematicians</span>
+          </span>
+        </button>
+
+        <button class="category-card" type="button" onclick="browseCategory('Countries')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="Country"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">C</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">Countries</span>
+            <span class="category-note">Nations, governments, cultures, capitals, history</span>
+          </span>
+        </button>
+
+        <button class="category-card" type="button" onclick="browseCategory('Languages')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="Language"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">L</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">Languages</span>
+            <span class="category-note">Languages, writing systems, linguistics, dialects</span>
+          </span>
+        </button>
+
+        <button class="category-card" type="button" onclick="browseCategory('Religion')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="Religion"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">R</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">Religion</span>
+            <span class="category-note">Religions, traditions, texts, history, beliefs</span>
+          </span>
+        </button>
+
+        <button class="category-card" type="button" onclick="browseCategory('Nature environment')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="Nature"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">N</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">Nature</span>
+            <span class="category-note">Ecology, climate, forests, oceans, environment</span>
+          </span>
+        </button>
+
+        <button class="category-card" type="button" onclick="browseCategory('Transportation vehicles')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="Vehicle"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">V</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">Vehicles</span>
+            <span class="category-note">Cars, aircraft, trains, ships, transportation history</span>
+          </span>
+        </button>
+
+        <button class="category-card" type="button" onclick="browseCategory('Business economics')">
+          <span class="category-image-wrap">
+            <img
+              class="category-image"
+              data-thumb-title="Economics"
+              alt=""
+              loading="lazy">
+            <span class="category-image-fallback" aria-hidden="true">B</span>
+          </span>
+
+          <span class="category-body">
+            <span class="category-code">—</span>
+            <span class="category-name">Business & Economics</span>
+            <span class="category-note">Companies, economics, industries, finance, trade</span>
+          </span>
+        </button>
+
+      </div>
+
+      <div class="quick-topic-row">
+        <button class="quick-topic" type="button" onclick="browseCategory('Minecraft')">Minecraft</button>
+        <button class="quick-topic" type="button" onclick="browseCategory('Fortnite')">Fortnite</button>
+        <button class="quick-topic" type="button" onclick="browseCategory('Nintendo')">Nintendo</button>
+        <button class="quick-topic" type="button" onclick="browseCategory('PlayStation')">PlayStation</button>
+        <button class="quick-topic" type="button" onclick="browseCategory('Scientists')">Scientists</button>
+        <button class="quick-topic" type="button" onclick="browseCategory('Inventors')">Inventors</button>
+        <button class="quick-topic" type="button" onclick="browseCategory('Presidents')">Presidents</button>
+        <button class="quick-topic" type="button" onclick="browseCategory('Actors')">Actors</button>
+        <button class="quick-topic" type="button" onclick="browseCategory('Football players')">Football players</button>
+        <button class="quick-topic" type="button" onclick="browseCategory('Ancient Egypt')">Ancient Egypt</button>
+      </div>
+
+      <div class="random-knowledge-box" id="random">
+        <strong>Discover something unexpected</strong>
+        Open a random encyclopedia article and explore a topic you might never have searched for.
+        <br>
+        <button
+          class="random-button"
+          type="button"
+          onclick="openRandomArticle()">
+          Random article
+        </button>
+      </div>
+    </section>
+
+
+    <section class="article-section" id="about">
+        <h2>About Infinium</h2>
+
+        <p>
+          Infinium is an encyclopedia-style knowledge project with a subtle warm
+          background and classic Cambria typography. This prototype uses Wikipedia's
+          public API for broad search. A future version can use Infinium's own database,
+          accounts, article editing, moderation, references, and revision history.
+        </p>
+      </section>
+
+    </main>
+
+
+    <aside class="contents">
+      <div class="side-title">Contents</div>
+      <a href="#main-page">Beginning</a>
+      <a href="#featured">Featured</a>
+      <a href="#recent">Explore</a>
+      <a href="#topics">Topics</a>
+      <a href="#about">About</a>
+    </aside>
+
+  </div>
+
+  </div>
+
+  <footer>
+    Infinium · An Endless World of Knowledge · 2026
+  </footer>
+
+
+
+
+  <!-- =================================
+       LOGIN
+  ================================== -->
+
+  <div class="modal" id="loginModal">
+
+    <div class="modal-box">
+
+      <button
+        class="modal-close"
+        type="button"
+        onclick="closeLogin()">
+        ×
+      </button>
+
+      <h2>Log In</h2>
+
+      <p>
+        Log in to an Infinium account saved in this browser.
+      </p>
+
+      <form onsubmit="login(event)">
+
+        <input
+          class="form-input"
+          id="loginUsername"
+          type="text"
+          placeholder="Username"
+          autocomplete="username"
+          required>
+
+        <div class="password-field">
+          <input
+            class="form-input"
+            id="loginPassword"
+            type="password"
+            placeholder="Password"
+            autocomplete="current-password"
+            required>
+
+          <button
+            class="password-visibility"
+            type="button"
+            onclick="togglePasswordVisibility('loginPassword', this)"
+            aria-label="Show password">
+            Show
+          </button>
+        </div>
+
+        <button
+          class="primary-button"
+          type="submit">
+          Log In
+        </button>
+
+      </form>
+
+      <div
+        class="form-message"
+        id="loginMessage">
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =================================
+       SIGN IN / CREATE ACCOUNT
+  ================================== -->
+
+  <div class="modal" id="signupModal">
+
+    <div class="modal-box">
+
+      <button
+        class="modal-close"
+        type="button"
+        onclick="closeSignup()">
+        ×
+      </button>
+
+      <h2>Sign In</h2>
+
+      <p>
+        Create a new Infinium account in this browser.
+      </p>
+
+      <form onsubmit="signup(event)">
+
+        <input
+          class="form-input"
+          id="signupUsername"
+          type="text"
+          placeholder="Choose a username"
+          autocomplete="username"
+          minlength="3"
+          required>
+
+        <input
+          class="form-input"
+          id="signupEmail"
+          type="email"
+          placeholder="Email"
+          autocomplete="email"
+          required>
+
+        <div class="password-field">
+          <input
+            class="form-input"
+            id="signupPassword"
+            type="password"
+            placeholder="Create a password"
+            autocomplete="new-password"
+            minlength="4"
+            required>
+
+          <button
+            class="password-visibility"
+            type="button"
+            onclick="togglePasswordVisibility('signupPassword', this)"
+            aria-label="Show password">
+            Show
+          </button>
+        </div>
+
+        <button
+          class="primary-button"
+          type="submit">
+          Create Account
+        </button>
+
+      </form>
+
+      <div
+        class="form-message"
+        id="signupMessage">
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =================================
+       SETTINGS
+  ================================== -->
+
+  <div class="modal" id="settingsModal">
+
+    <div class="modal-box">
+
+      <button
+        class="modal-close"
+        type="button"
+        onclick="closeSettings()">
+        ×
+      </button>
+
+      <h2>Settings</h2>
+
+      <p>
+        Change the appearance of Infinium and manage your local session.
+      </p>
+
+
+      <div class="settings-section">
+
+        <h3>Appearance</h3>
+
+        <div class="theme-options">
+
+          <button
+            class="theme-choice"
+            id="lightThemeButton"
+            type="button"
+            onclick="setTheme('light')">
+            Light
+          </button>
+
+          <button
+            class="theme-choice"
+            id="darkThemeButton"
+            type="button"
+            onclick="setTheme('dark')">
+            Dark
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="settings-section">
+        <h3>Reading</h3>
+
+        <div class="setting-row">
+          <div>Text size</div>
+          <div class="setting-choice-row">
+            <button class="setting-choice" id="fontSmallButton" type="button" onclick="setFontSize('small')">Small</button>
+            <button class="setting-choice" id="fontMediumButton" type="button" onclick="setFontSize('medium')">Medium</button>
+            <button class="setting-choice" id="fontLargeButton" type="button" onclick="setFontSize('large')">Large</button>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div>Article width</div>
+          <div class="setting-choice-row">
+            <button class="setting-choice" id="widthNarrowButton" type="button" onclick="setReadingWidth('narrow')">Narrow</button>
+            <button class="setting-choice" id="widthStandardButton" type="button" onclick="setReadingWidth('standard')">Standard</button>
+            <button class="setting-choice" id="widthWideButton" type="button" onclick="setReadingWidth('wide')">Wide</button>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="settings-section">
+        <h3>Knowledge Source</h3>
+
+        <select class="settings-select" id="languageSelect" onchange="setLanguage(this.value)">
+          <option value="en">English</option>
+          <option value="ar">Arabic</option>
+          <option value="fr">French</option>
+          <option value="es">Spanish</option>
+          <option value="de">German</option>
+        </select>
+      </div>
+
+
+      <div class="settings-section">
+
+        <h3>Account</h3>
+
+        <div
+          class="settings-account"
+          id="settingsAccount">
+          You are browsing as a guest.
+        </div>
+
+        <button
+          class="danger-button"
+          id="logoutButton"
+          type="button"
+          onclick="logout()"
+          style="display:none;">
+          Log Out
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="modal" id="profileModal">
+
+    <div class="modal-box">
+
+      <button
+        class="modal-close"
+        type="button"
+        onclick="closeProfile()">
+        ×
+      </button>
+
+      <h2>Profile</h2>
+
+      <div class="settings-account" id="profileAccount"></div>
+
+      <div class="settings-section">
+        <h3>Saved Articles</h3>
+        <div class="profile-list" id="profileSavedList"></div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Recent Searches</h3>
+        <div class="profile-list" id="profileHistoryList"></div>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  
+  <!-- =================================
+       SECTION NAVIGATION DOTS
+  ================================== -->
+
+  <nav
+    class="section-dots"
+    id="sectionDots"
+    aria-label="Section navigation">
+
+    <button
+      class="section-dot active"
+      type="button"
+      data-section="home"
+      aria-label="Home">
+      <span class="section-dot-label">Home</span>
+    </button>
+
+    <button
+      class="section-dot"
+      type="button"
+      data-section="featured"
+      aria-label="Featured">
+      <span class="section-dot-label">Featured</span>
+    </button>
+
+    <button
+      class="section-dot"
+      type="button"
+      data-section="recent"
+      aria-label="Recently added">
+      <span class="section-dot-label">Recent</span>
+    </button>
+
+    <button
+      class="section-dot"
+      type="button"
+      data-section="topics"
+      aria-label="Topics">
+      <span class="section-dot-label">Topics</span>
+    </button>
+
+    <button
+      class="section-dot"
+      type="button"
+      data-section="everything"
+      aria-label="Explore everything">
+      <span class="section-dot-label">Explore</span>
+    </button>
+
+    <button
+      class="section-dot"
+      type="button"
+      data-section="about"
+      aria-label="About Infinium">
+      <span class="section-dot-label">About</span>
+    </button>
+
+  </nav>
+
+<div class="infinium-toast" id="infiniumToast" role="status" aria-live="polite"></div>
+
+  <script>
+
+
+
+
+
+
+
+
+
+
+    /* ===============================
+       SECTION NAVIGATION DOTS
+    =============================== */
+
+    const sectionDotButtons =
+      Array.from(
+        document.querySelectorAll(
+          ".section-dot"
+        )
+      );
+
+
+    function setActiveSectionDot(
+      sectionName
+    ) {
+
+      sectionDotButtons.forEach(
+        function(dot) {
+
+          const active =
+            dot.dataset.section ===
+            sectionName;
+
+          dot.classList.toggle(
+            "active",
+            active
+          );
+
+          dot.setAttribute(
+            "aria-current",
+            active
+              ? "true"
+              : "false"
+          );
+
+        }
+      );
+
+    }
+
+
+    function goToDotSection(
+      sectionName
+    ) {
+
+      if (
+        sectionName ===
+        "home"
+      ) {
+
+        showHomeMenu();
+
+        setActiveSectionDot(
+          "home"
+        );
+
+        return;
+      }
+
+
+      showEncyclopediaView();
+
+      const target =
+        document.getElementById(
+          sectionName
+        );
+
+      if (!target) {
+        return;
+      }
+
+      setTimeout(
+        function() {
+
+          target.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
+
+        },
+        25
+      );
+
+    }
+
+
+    sectionDotButtons.forEach(
+      function(dot) {
+
+        dot.addEventListener(
+          "click",
+          function() {
+
+            goToDotSection(
+              dot.dataset.section
+            );
+
+          }
+        );
+
+      }
+    );
+
+
+    const observedDotSections =
+      [
+        "featured",
+        "recent",
+        "topics",
+        "everything",
+        "about"
+      ]
+      .map(
+        function(id) {
+          return document.getElementById(
+            id
+          );
+        }
+      )
+      .filter(Boolean);
+
+
+    function updateDotFromScroll() {
+
+      if (
+        infiniumHome &&
+        infiniumHome.classList.contains(
+          "show"
+        )
+      ) {
+
+        setActiveSectionDot(
+          "home"
+        );
+
+        return;
+      }
+
+
+      if (
+        !observedDotSections.length
+      ) {
+        return;
+      }
+
+
+      const referenceLine =
+        window.innerHeight * 0.36;
+
+      let current =
+        observedDotSections[0];
+
+
+      observedDotSections.forEach(
+        function(section) {
+
+          const rect =
+            section.getBoundingClientRect();
+
+          if (
+            rect.top <=
+            referenceLine
+          ) {
+            current =
+              section;
+          }
+
+        }
+      );
+
+
+      setActiveSectionDot(
+        current.id
+      );
+
+    }
+
+
+    window.addEventListener(
+      "scroll",
+      updateDotFromScroll,
+      {
+        passive: true
+      }
+    );
+
+
+    window.addEventListener(
+      "resize",
+      updateDotFromScroll
+    );
+
+
+    /* ===============================
+       ACTION RELIABILITY
+    =============================== */
+
+    const infiniumToast =
+      document.getElementById(
+        "infiniumToast"
+      );
+
+    let infiniumToastTimer =
+      null;
+
+
+    function showToast(message) {
+
+      if (!infiniumToast) {
+        return;
+      }
+
+      clearTimeout(
+        infiniumToastTimer
+      );
+
+      infiniumToast.textContent =
+        message;
+
+      infiniumToast.classList.add(
+        "show"
+      );
+
+      infiniumToastTimer =
+        setTimeout(
+          function() {
+            infiniumToast.classList.remove(
+              "show"
+            );
+          },
+          2200
+        );
+
+    }
+
+
+    function scrollToInfiniumSection(id) {
+
+      showEncyclopediaView();
+
+      const target =
+        document.getElementById(
+          id
+        );
+
+      if (!target) {
+        return;
+      }
+
+      setTimeout(
+        function() {
+          target.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
+        },
+        25
+      );
+
+    }
+
+
+    function wireSectionNavigation() {
+
+      document
+        .querySelectorAll(
+          'a[href^="#"]:not([href="#"])'
+        )
+        .forEach(
+          function(link) {
+
+            link.addEventListener(
+              "click",
+              function(event) {
+
+                const id =
+                  link
+                    .getAttribute("href")
+                    .slice(1);
+
+                if (
+                  !document.getElementById(
+                    id
+                  )
+                ) {
+                  return;
+                }
+
+                event.preventDefault();
+
+                scrollToInfiniumSection(
+                  id
+                );
+
+              }
+            );
+
+          }
+        );
+
+    }
+
+
+    function wireSourceLink() {
+
+      const source =
+        document.getElementById(
+          "sourceArticle"
+        );
+
+      if (!source) {
+        return;
+      }
+
+      source.addEventListener(
+        "click",
+        function(event) {
+
+          if (
+            !currentArticleTitle ||
+            source.classList.contains(
+              "source-disabled"
+            )
+          ) {
+            event.preventDefault();
+
+            showToast(
+              "Open an article first."
+            );
+          }
+
+        }
+      );
+
+    }
+
+
+    /* ===============================
+       PASSWORD VISIBILITY
+    =============================== */
+
+    function togglePasswordVisibility(
+      inputId,
+      button
+    ) {
+
+      const input =
+        document.getElementById(
+          inputId
+        );
+
+      if (!input) {
+        return;
+      }
+
+      const isHidden =
+        input.type === "password";
+
+      input.type =
+        isHidden
+          ? "text"
+          : "password";
+
+      button.textContent =
+        isHidden
+          ? "Hide"
+          : "Show";
+
+      button.setAttribute(
+        "aria-label",
+        isHidden
+          ? "Hide password"
+          : "Show password"
+      );
+
+    }
+
+    /* ===============================
+       INFINIUM HOME
+    =============================== */
+
+    const infiniumHome =
+      document.getElementById(
+        "infiniumHome"
+      );
+
+    const encyclopediaView =
+      document.getElementById(
+        "encyclopediaView"
+      );
+
+    const homeSearchForm =
+      document.getElementById(
+        "homeSearchForm"
+      );
+
+    const homeSearchInput =
+      document.getElementById(
+        "homeSearchInput"
+      );
+
+
+    function showHomeMenu(event) {
+
+      if (event) {
+        event.preventDefault();
+      }
+
+      infiniumHome.classList.add(
+        "show"
+      );
+
+      setActiveSectionDot(
+        "home"
+      );
+
+      encyclopediaView.classList.add(
+        "hidden-view"
+      );
+
+      if (articleViewer) {
+        articleViewer.classList.remove(
+          "show"
+        );
+      }
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+
+      setTimeout(
+        function() {
+          homeSearchInput.focus();
+        },
+        120
+      );
+
+    }
+
+
+    function showEncyclopediaView() {
+
+      infiniumHome.classList.remove(
+        "show"
+      );
+
+      encyclopediaView.classList.remove(
+        "hidden-view"
+      );
+
+      setTimeout(
+        updateDotFromScroll,
+        40
+      );
+
+    }
+
+
+    function homeQuickSearch(query) {
+
+      homeSearchInput.value =
+        query;
+
+      searchInput.value =
+        query;
+
+      showEncyclopediaView();
+
+      searchInfinium(
+        query
+      );
+
+    }
+
+
+    homeSearchForm.addEventListener(
+      "submit",
+      function(event) {
+
+        event.preventDefault();
+
+        const query =
+          homeSearchInput
+            .value
+            .trim();
+
+        if (!query) {
+          return;
+        }
+
+        searchInput.value =
+          query;
+
+        showEncyclopediaView();
+
+        searchInfinium(
+          query
+        );
+
+      }
+    );
+
+
+    /* ===============================
+       CATEGORY THUMBNAILS
+    =============================== */
+
+    async function loadCategoryThumbnail(img) {
+      const title =
+        img.dataset.thumbTitle;
+
+      if (!title) {
+        return;
+      }
+
+      const url =
+        getWikiApiBase() +
+        "?action=query" +
+        "&titles=" + encodeURIComponent(title) +
+        "&prop=pageimages" +
+        "&piprop=thumbnail" +
+        "&pithumbsize=420" +
+        "&format=json" +
+        "&origin=*";
+
+      try {
+        const response =
+          await fetch(url);
+
+        if (!response.ok) {
+          return;
+        }
+
+        const data =
+          await response.json();
+
+        const page =
+          Object.values(
+            data?.query?.pages || {}
+          )[0];
+
+        const source =
+          page?.thumbnail?.source;
+
+        if (!source) {
+          return;
+        }
+
+        img.src = source;
+
+        img.addEventListener(
+          "load",
+          function() {
+            img.classList.add("loaded");
+
+            const fallback =
+              img.parentElement
+                ?.querySelector(
+                  ".category-image-fallback"
+                );
+
+            if (fallback) {
+              fallback.style.display = "none";
+            }
+          },
+          { once: true }
+        );
+
+      } catch (error) {
+        /* Keep the icon fallback if an image cannot load. */
+      }
+    }
+
+
+    function loadCategoryImages() {
+      document
+        .querySelectorAll(
+          ".category-image[data-thumb-title]"
+        )
+        .forEach(
+          function(img) {
+            loadCategoryThumbnail(img);
+          }
+        );
+    }
+
+
+    /* ===============================
+       LOCAL ACCOUNT DEMO
+    =============================== */
+
+    const USERS_KEY =
+      "infinium_users";
+
+    const CURRENT_USER_KEY =
+      "infinium_current_user";
+
+    const THEME_KEY =
+      "infinium_theme";
+
+
+    function getUsers() {
+      try {
+        return JSON.parse(
+          localStorage.getItem(
+            USERS_KEY
+          )
+        ) || {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+
+    function saveUsers(users) {
+      localStorage.setItem(
+        USERS_KEY,
+        JSON.stringify(users)
+      );
+    }
+
+
+    function getCurrentUser() {
+      return localStorage.getItem(
+        CURRENT_USER_KEY
+      );
+    }
+
+
+    function openLogin() {
+      document
+        .getElementById("loginMessage")
+        .textContent = "";
+
+      document
+        .getElementById("loginModal")
+        .classList.add("show");
+    }
+
+
+    function closeLogin() {
+      document
+        .getElementById("loginModal")
+        .classList.remove("show");
+    }
+
+
+    function openSignup() {
+      document
+        .getElementById("signupMessage")
+        .textContent = "";
+
+      document
+        .getElementById("signupModal")
+        .classList.add("show");
+    }
+
+
+    function closeSignup() {
+      document
+        .getElementById("signupModal")
+        .classList.remove("show");
+    }
+
+
+    function login(event) {
+      event.preventDefault();
+
+      const username =
+        document
+          .getElementById(
+            "loginUsername"
+          )
+          .value
+          .trim();
+
+      const password =
+        document
+          .getElementById(
+            "loginPassword"
+          )
+          .value;
+
+      const users =
+        getUsers();
+
+      const user =
+        users[
+          username.toLowerCase()
+        ];
+
+      const message =
+        document.getElementById(
+          "loginMessage"
+        );
+
+      if (
+        !user ||
+        user.password !== password
+      ) {
+        message.textContent =
+          "Incorrect username or password.";
+        return;
+      }
+
+      localStorage.setItem(
+        CURRENT_USER_KEY,
+        user.username
+      );
+
+      event.target.reset();
+
+      updateAccountUI();
+
+      message.textContent =
+        "Logged in successfully.";
+
+      showToast(
+        "Logged in as " +
+        user.username +
+        "."
+      );
+
+      renderPersonalSections();
+
+      setTimeout(
+        closeLogin,
+        450
+      );
+    }
+
+
+    function signup(event) {
+      event.preventDefault();
+
+      const username =
+        document
+          .getElementById(
+            "signupUsername"
+          )
+          .value
+          .trim();
+
+      const email =
+        document
+          .getElementById(
+            "signupEmail"
+          )
+          .value
+          .trim();
+
+      const password =
+        document
+          .getElementById(
+            "signupPassword"
+          )
+          .value;
+
+      const message =
+        document.getElementById(
+          "signupMessage"
+        );
+
+      const users =
+        getUsers();
+
+      const key =
+        username.toLowerCase();
+
+      if (users[key]) {
+        message.textContent =
+          "That username already exists.";
+        return;
+      }
+
+      const emailUsed =
+        Object.values(users)
+          .some(
+            function(user) {
+              return (
+                user.email.toLowerCase() ===
+                email.toLowerCase()
+              );
+            }
+          );
+
+      if (emailUsed) {
+        message.textContent =
+          "That email is already registered.";
+        return;
+      }
+
+      users[key] = {
+        username: username,
+        email: email,
+        password: password
+      };
+
+      saveUsers(users);
+
+      localStorage.setItem(
+        CURRENT_USER_KEY,
+        username
+      );
+
+      event.target.reset();
+
+      updateAccountUI();
+
+      message.textContent =
+        "Account created. Welcome to Infinium.";
+
+      showToast(
+        "Account created successfully."
+      );
+
+      renderPersonalSections();
+
+      setTimeout(
+        closeSignup,
+        550
+      );
+    }
+
+
+    function logout() {
+      localStorage.removeItem(
+        CURRENT_USER_KEY
+      );
+
+      updateAccountUI();
+      renderPersonalSections();
+      closeSettings();
+      closeProfile();
+
+      showToast(
+        "You have been logged out."
+      );
+    }
+
+
+    function updateAccountUI() {
+      const username =
+        getCurrentUser();
+
+      const loginButton =
+        document.getElementById(
+          "loginButton"
+        );
+
+      const createButton =
+        document.getElementById(
+          "createAccountButton"
+        );
+
+      const headerUser =
+        document.getElementById(
+          "headerUser"
+        );
+
+      const headerUsername =
+        document.getElementById(
+          "headerUsername"
+        );
+
+      const settingsAccount =
+        document.getElementById(
+          "settingsAccount"
+        );
+
+      const logoutButton =
+        document.getElementById(
+          "logoutButton"
+        );
+
+      if (username) {
+        loginButton.style.display =
+          "none";
+
+        createButton.style.display =
+          "none";
+
+        headerUser.classList.add(
+          "show"
+        );
+
+        headerUsername.textContent =
+          username;
+
+        settingsAccount.textContent =
+          "Signed in as " + username + ".";
+
+        logoutButton.style.display =
+          "block";
+
+      } else {
+        loginButton.style.display =
+          "";
+
+        createButton.style.display =
+          "";
+
+        headerUser.classList.remove(
+          "show"
+        );
+
+        headerUsername.textContent =
+          "";
+
+        settingsAccount.textContent =
+          "You are browsing as a guest.";
+
+        logoutButton.style.display =
+          "none";
+      }
+
+      renderPersonalSections();
+      renderProfile();
+    }
+
+
+    /* ===============================
+       SETTINGS / THEME
+    =============================== */
+
+    function openSettings() {
+      updateAccountUI();
+      updateThemeButtons();
+      updateReadingButtons();
+      applyLanguageSetting();
+
+      document
+        .getElementById(
+          "settingsModal"
+        )
+        .classList.add("show");
+    }
+
+
+    function closeSettings() {
+      document
+        .getElementById(
+          "settingsModal"
+        )
+        .classList.remove("show");
+    }
+
+
+    function setTheme(theme) {
+      const dark =
+        theme === "dark";
+
+      document.body.classList.toggle(
+        "dark-mode",
+        dark
+      );
+
+      localStorage.setItem(
+        THEME_KEY,
+        dark ? "dark" : "light"
+      );
+
+      updateThemeButtons();
+    }
+
+
+    function getTheme() {
+      return (
+        localStorage.getItem(
+          THEME_KEY
+        ) || "light"
+      );
+    }
+
+
+    function updateThemeButtons() {
+      const theme =
+        document.body.classList
+          .contains("dark-mode")
+          ? "dark"
+          : "light";
+
+      document
+        .getElementById(
+          "lightThemeButton"
+        )
+        ?.classList
+        .toggle(
+          "active",
+          theme === "light"
+        );
+
+      document
+        .getElementById(
+          "darkThemeButton"
+        )
+        ?.classList
+        .toggle(
+          "active",
+          theme === "dark"
+        );
+    }
+
+
+    function applySavedTheme() {
+      setTheme(
+        getTheme()
+      );
+    }
+
+
+    /* Close account/settings windows by clicking outside. */
+    window.addEventListener(
+      "click",
+      function(event) {
+        [
+          ["loginModal", closeLogin],
+          ["signupModal", closeSignup],
+          ["settingsModal", closeSettings]
+        ].forEach(
+          function(item) {
+            const modal =
+              document.getElementById(
+                item[0]
+              );
+
+            if (
+              modal &&
+              event.target === modal
+            ) {
+              item[1]();
+            }
+          }
+        );
+      }
+    );
+
+
+    const searchForm = document.getElementById("searchForm");
+
+
+    /* ===============================
+       INFINIUM PERSONALIZATION
+    =============================== */
+
+    const SAVED_PREFIX = "infinium_saved_";
+    const HISTORY_PREFIX = "infinium_history_";
+    const FONT_KEY = "infinium_font_size";
+    const WIDTH_KEY = "infinium_reading_width";
+    const LANGUAGE_KEY = "infinium_language";
+
+    let currentArticleTitle = "";
+    let lastSearchQuery = "";
+
+    const articleImage = document.getElementById("articleImage");
+    const articleMeta = document.getElementById("articleMeta");
+    const saveArticleButton = document.getElementById("saveArticleButton");
+    const knowledgePath = document.getElementById("knowledgePath");
+    const relatedArticles = document.getElementById("relatedArticles");
+
+    function currentScope() {
+      return (getCurrentUser() || "guest").toLowerCase();
+    }
+
+    function getScopedList(prefix) {
+      try {
+        return JSON.parse(
+          localStorage.getItem(prefix + currentScope())
+        ) || [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveScopedList(prefix, list) {
+      localStorage.setItem(
+        prefix + currentScope(),
+        JSON.stringify(list)
+      );
+    }
+
+    function getSavedArticles() {
+      return getScopedList(SAVED_PREFIX);
+    }
+
+    function getSearchHistory() {
+      return getScopedList(HISTORY_PREFIX);
+    }
+
+    function recordSearch(query) {
+      const clean = String(query || "").trim();
+
+      if (!clean) {
+        return;
+      }
+
+      let history = getSearchHistory()
+        .filter(function(item) {
+          return item.toLowerCase() !== clean.toLowerCase();
+        });
+
+      history.unshift(clean);
+      history = history.slice(0, 10);
+
+      saveScopedList(HISTORY_PREFIX, history);
+      renderPersonalSections();
+    }
+
+    function clearSearchHistory() {
+      saveScopedList(HISTORY_PREFIX, []);
+      renderPersonalSections();
+      renderProfile();
+      showToast("Search history cleared.");
+    }
+
+    function toggleSaveArticle() {
+      if (!currentArticleTitle) {
+        return;
+      }
+
+      let saved = getSavedArticles();
+      const exists = saved.some(function(item) {
+        return item.toLowerCase() === currentArticleTitle.toLowerCase();
+      });
+
+      if (exists) {
+        saved = saved.filter(function(item) {
+          return item.toLowerCase() !== currentArticleTitle.toLowerCase();
+        });
+      } else {
+        saved.unshift(currentArticleTitle);
+        saved = saved.slice(0, 30);
+      }
+
+      saveScopedList(SAVED_PREFIX, saved);
+      updateSaveButton();
+      renderPersonalSections();
+      renderProfile();
+
+      showToast(
+        exists
+          ? "Article removed from saved items."
+          : "Article saved to your profile."
+      );
+    }
+
+    function updateSaveButton() {
+      if (!saveArticleButton) {
+        return;
+      }
+
+      const saved = getSavedArticles();
+      const isSaved = currentArticleTitle &&
+        saved.some(function(item) {
+          return item.toLowerCase() === currentArticleTitle.toLowerCase();
+        });
+
+      saveArticleButton.textContent = isSaved ? "Saved" : "Save Article";
+      saveArticleButton.classList.toggle("saved", Boolean(isSaved));
+    }
+
+    function makeDashboardItem(title, action) {
+      const button = document.createElement("button");
+      button.className = "dashboard-link";
+      button.type = "button";
+      button.textContent = title;
+      button.addEventListener("click", action);
+      return button;
+    }
+
+    function renderList(target, items, emptyText, action) {
+      if (!target) {
+        return;
+      }
+
+      target.innerHTML = "";
+
+      if (!items.length) {
+        const empty = document.createElement("div");
+        empty.className = "dashboard-empty";
+        empty.textContent = emptyText;
+        target.appendChild(empty);
+        return;
+      }
+
+      items.slice(0, 5).forEach(function(item) {
+        target.appendChild(
+          makeDashboardItem(item, function() {
+            action(item);
+          })
+        );
+      });
+    }
+
+    function renderPersonalSections() {
+      renderList(
+        document.getElementById("homeHistoryList"),
+        getSearchHistory(),
+        "No searches yet.",
+        function(item) {
+          homeQuickSearch(item);
+        }
+      );
+
+      renderList(
+        document.getElementById("homeSavedList"),
+        getSavedArticles(),
+        "No saved articles yet.",
+        function(item) {
+          showEncyclopediaView();
+          loadArticle(item);
+        }
+      );
+    }
+
+    function openProfile() {
+      renderProfile();
+      document.getElementById("profileModal").classList.add("show");
+    }
+
+    function closeProfile() {
+      document.getElementById("profileModal").classList.remove("show");
+    }
+
+    function renderProfile() {
+      const username = getCurrentUser();
+      const account = document.getElementById("profileAccount");
+
+      if (!account) {
+        return;
+      }
+
+      if (username) {
+        const users = getUsers();
+        const user = users[username.toLowerCase()];
+        account.textContent = user
+          ? username + " — " + user.email
+          : username;
+      } else {
+        account.textContent = "Guest profile — saved items are stored only in this browser.";
+      }
+
+      const savedTarget = document.getElementById("profileSavedList");
+      const historyTarget = document.getElementById("profileHistoryList");
+
+      savedTarget.innerHTML = "";
+      const saved = getSavedArticles();
+
+      if (!saved.length) {
+        savedTarget.innerHTML = '<div class="dashboard-empty">No saved articles.</div>';
+      } else {
+        saved.slice(0, 12).forEach(function(title) {
+          const row = document.createElement("div");
+          row.className = "profile-item";
+          row.innerHTML =
+            '<span>' + escapeHtml(title) + '</span>' +
+            '<button type="button">Open</button>';
+
+          row.querySelector("button").addEventListener("click", function() {
+            closeProfile();
+            showEncyclopediaView();
+            loadArticle(title);
+          });
+
+          savedTarget.appendChild(row);
+        });
+      }
+
+      historyTarget.innerHTML = "";
+      const history = getSearchHistory();
+
+      if (!history.length) {
+        historyTarget.innerHTML = '<div class="dashboard-empty">No recent searches.</div>';
+      } else {
+        history.slice(0, 10).forEach(function(query) {
+          const row = document.createElement("div");
+          row.className = "profile-item";
+          row.innerHTML =
+            '<span>' + escapeHtml(query) + '</span>' +
+            '<button type="button">Search</button>';
+
+          row.querySelector("button").addEventListener("click", function() {
+            closeProfile();
+            homeQuickSearch(query);
+          });
+
+          historyTarget.appendChild(row);
+        });
+      }
+    }
+
+    function setFontSize(size) {
+      localStorage.setItem(FONT_KEY, size);
+
+      document.body.classList.remove("font-small", "font-large");
+
+      if (size === "small") {
+        document.body.classList.add("font-small");
+      }
+
+      if (size === "large") {
+        document.body.classList.add("font-large");
+      }
+
+      updateReadingButtons();
+    }
+
+    function setReadingWidth(width) {
+      localStorage.setItem(WIDTH_KEY, width);
+
+      document.body.classList.remove("reading-narrow", "reading-wide");
+
+      if (width === "narrow") {
+        document.body.classList.add("reading-narrow");
+      }
+
+      if (width === "wide") {
+        document.body.classList.add("reading-wide");
+      }
+
+      updateReadingButtons();
+    }
+
+    function updateReadingButtons() {
+      const font = localStorage.getItem(FONT_KEY) || "medium";
+      const width = localStorage.getItem(WIDTH_KEY) || "standard";
+
+      ["small", "medium", "large"].forEach(function(value) {
+        document.getElementById(
+          "font" + value.charAt(0).toUpperCase() + value.slice(1) + "Button"
+        )?.classList.toggle("active", font === value);
+      });
+
+      ["narrow", "standard", "wide"].forEach(function(value) {
+        document.getElementById(
+          "width" + value.charAt(0).toUpperCase() + value.slice(1) + "Button"
+        )?.classList.toggle("active", width === value);
+      });
+    }
+
+    function applyReadingPreferences() {
+      setFontSize(localStorage.getItem(FONT_KEY) || "medium");
+      setReadingWidth(localStorage.getItem(WIDTH_KEY) || "standard");
+    }
+
+    function getLanguage() {
+      return localStorage.getItem(LANGUAGE_KEY) || "en";
+    }
+
+    function getWikiApiBase() {
+      return "https://" + getLanguage() + ".wikipedia.org/w/api.php";
+    }
+
+    function getWikiArticleBase() {
+      return "https://" + getLanguage() + ".wikipedia.org/wiki/";
+    }
+
+    function languageName(code) {
+      return {
+        en: "English",
+        ar: "Arabic",
+        fr: "French",
+        es: "Spanish",
+        de: "German"
+      }[code] || "English";
+    }
+
+    function setLanguage(code) {
+      localStorage.setItem(LANGUAGE_KEY, code);
+      const select = document.getElementById("languageSelect");
+
+      if (select) {
+        select.value = code;
+      }
+
+      loadDailyKnowledge();
+
+      if (currentArticleTitle) {
+        loadArticle(currentArticleTitle);
+      }
+
+      showToast(
+        "Knowledge source changed to " +
+        languageName(code) +
+        "."
+      );
+    }
+
+    function applyLanguageSetting() {
+      const select = document.getElementById("languageSelect");
+
+      if (select) {
+        select.value = getLanguage();
+      }
+    }
+
+    const dailySubjects = [
+      "Astronomy",
+      "History of writing",
+      "Mathematics",
+      "Ocean",
+      "Architecture",
+      "Computer science",
+      "Ancient Egypt",
+      "Evolution",
+      "World Wide Web",
+      "Philosophy",
+      "Music",
+      "Solar System",
+      "Language",
+      "Electricity"
+    ];
+
+    function loadDailyKnowledge() {
+      const index =
+        Math.floor(Date.now() / 86400000) % dailySubjects.length;
+
+      const title = dailySubjects[index];
+      const button = document.getElementById("dailyKnowledgeTitle");
+      const summary = document.getElementById("dailyKnowledgeSummary");
+
+      if (button) {
+        button.textContent = title;
+        button.onclick = function() {
+          showEncyclopediaView();
+          loadArticle(title);
+        };
+      }
+
+      if (summary) {
+        summary.textContent =
+          "Today's selected subject from the " +
+          languageName(getLanguage()) +
+          " knowledge source.";
+      }
+    }
+
+    function renderKnowledgePath(articleTitleValue) {
+      if (!knowledgePath) {
+        return;
+      }
+
+      knowledgePath.innerHTML = "";
+
+      const home = document.createElement("button");
+      home.className = "path-part";
+      home.type = "button";
+      home.textContent = "Infinium";
+      home.addEventListener("click", function() {
+        showHomeMenu();
+      });
+      knowledgePath.appendChild(home);
+
+      if (lastSearchQuery) {
+        const sep1 = document.createElement("span");
+        sep1.className = "path-separator";
+        sep1.textContent = "/";
+        knowledgePath.appendChild(sep1);
+
+        const searchPart = document.createElement("button");
+        searchPart.className = "path-part";
+        searchPart.type = "button";
+        searchPart.textContent = lastSearchQuery;
+        searchPart.addEventListener("click", function() {
+          searchInfinium(lastSearchQuery);
+        });
+        knowledgePath.appendChild(searchPart);
+      }
+
+      const sep2 = document.createElement("span");
+      sep2.className = "path-separator";
+      sep2.textContent = "/";
+      knowledgePath.appendChild(sep2);
+
+      const current = document.createElement("span");
+      current.className = "path-part";
+      current.textContent = articleTitleValue;
+      knowledgePath.appendChild(current);
+    }
+
+    function renderRelatedArticles(links) {
+      if (!relatedArticles) {
+        return;
+      }
+
+      relatedArticles.innerHTML = "";
+
+      const cleanLinks = (links || [])
+        .map(function(link) {
+          return link.title;
+        })
+        .filter(Boolean)
+        .slice(0, 8);
+
+      if (!cleanLinks.length) {
+        relatedArticles.innerHTML =
+          '<span class="dashboard-empty">Related topics are not available for this article.</span>';
+        return;
+      }
+
+      cleanLinks.forEach(function(title) {
+        const button = document.createElement("button");
+        button.className = "related-topic";
+        button.type = "button";
+        button.textContent = title;
+        button.addEventListener("click", function() {
+          loadArticle(title);
+        });
+
+        relatedArticles.appendChild(button);
+      });
+    }
+
+    function closeAllModalsByBackdrop(event) {
+      [
+        ["loginModal", closeLogin],
+        ["signupModal", closeSignup],
+        ["settingsModal", closeSettings],
+        ["profileModal", closeProfile]
+      ].forEach(function(item) {
+        const modal = document.getElementById(item[0]);
+
+        if (modal && event.target === modal) {
+          item[1]();
+        }
+      });
+    }
+
+    saveArticleButton?.addEventListener("click", toggleSaveArticle);
+
+
+    const searchInput = document.getElementById("searchInput");
+    const searchArea = document.getElementById("searchArea");
+    const searchTitle = document.getElementById("searchTitle");
+    const searchMeta = document.getElementById("searchMeta");
+    const searchResults = document.getElementById("searchResults");
+    const searchSuggestions = document.getElementById("searchSuggestions");
+
+    const articleViewer = document.getElementById("articleViewer");
+    const articleTitle = document.getElementById("articleTitle");
+    const articleExtract = document.getElementById("articleExtract");
+    const sourceArticle = document.getElementById("sourceArticle");
+    const closeArticle = document.getElementById("closeArticle");
+
+
+    function escapeHtml(value) {
+      const div = document.createElement("div");
+      div.textContent = value;
+      return div.innerHTML;
+    }
+
+
+    function stripHtml(html) {
+      const temp = document.createElement("div");
+      temp.innerHTML = html;
+      return temp.textContent || temp.innerText || "";
+    }
+
+
+
+    let suggestionTimer = null;
+    let suggestionAbortController = null;
+    let currentSuggestions = [];
+    let activeSuggestionIndex = -1;
+
+
+    function hideSuggestions() {
+      searchSuggestions.classList.remove("show");
+      searchSuggestions.innerHTML = "";
+      searchInput.setAttribute("aria-expanded", "false");
+      activeSuggestionIndex = -1;
+    }
+
+
+    function showSuggestionsBox() {
+      searchSuggestions.classList.add("show");
+      searchInput.setAttribute("aria-expanded", "true");
+    }
+
+
+    function setActiveSuggestion(index) {
+      const items =
+        Array.from(
+          searchSuggestions.querySelectorAll(".suggestion-item")
+        );
+
+      if (!items.length) {
+        activeSuggestionIndex = -1;
+        return;
+      }
+
+      if (index < 0) {
+        index = items.length - 1;
+      }
+
+      if (index >= items.length) {
+        index = 0;
+      }
+
+      activeSuggestionIndex = index;
+
+      items.forEach(function(item, itemIndex) {
+        item.classList.toggle(
+          "active",
+          itemIndex === activeSuggestionIndex
+        );
+      });
+
+      items[activeSuggestionIndex].scrollIntoView({
+        block: "nearest"
+      });
+    }
+
+
+    function openSuggestion(page) {
+      if (!page || !page.title) {
+        return;
+      }
+
+      searchInput.value = page.title;
+      hideSuggestions();
+
+      loadArticle(page.title);
+    }
+
+
+    function renderSuggestions(pages) {
+      currentSuggestions = pages;
+      activeSuggestionIndex = -1;
+
+      searchSuggestions.innerHTML = "";
+
+      if (!pages.length) {
+        searchSuggestions.innerHTML =
+          '<div class="suggestion-empty">No matching articles found.</div>';
+        showSuggestionsBox();
+        return;
+      }
+
+      pages.forEach(function(page, index) {
+        const button =
+          document.createElement("button");
+
+        button.type = "button";
+        button.className = "suggestion-item";
+        button.setAttribute("role", "option");
+
+        const title =
+          page.title || "Untitled";
+
+        const description =
+          page?.terms?.description?.[0] ||
+          "Encyclopedia article";
+
+        const thumbnail =
+          page?.thumbnail?.source || "";
+
+        const firstLetter =
+          title.charAt(0).toUpperCase();
+
+        button.innerHTML =
+          (
+            thumbnail
+              ? '<img class="suggestion-thumb" src="' +
+                escapeHtml(thumbnail) +
+                '" alt="">'
+              : '<div class="suggestion-thumb-fallback">' +
+                escapeHtml(firstLetter) +
+                '</div>'
+          ) +
+          '<span class="suggestion-text">' +
+            '<span class="suggestion-title">' +
+              escapeHtml(title) +
+            '</span>' +
+            '<span class="suggestion-description">' +
+              escapeHtml(description) +
+            '</span>' +
+          '</span>';
+
+        button.addEventListener("mouseenter", function() {
+          setActiveSuggestion(index);
+        });
+
+        button.addEventListener("click", function() {
+          openSuggestion(page);
+        });
+
+        searchSuggestions.appendChild(button);
+      });
+
+      const footer =
+        document.createElement("div");
+
+      footer.className = "suggestion-footer";
+      footer.textContent =
+        "Press ↑ or ↓ to choose • Enter to open";
+
+      searchSuggestions.appendChild(footer);
+
+      showSuggestionsBox();
+    }
+
+
+    async function fetchLiveSuggestions(query) {
+      const cleanQuery =
+        String(query || "").trim();
+
+      if (!cleanQuery) {
+        hideSuggestions();
+        return;
+      }
+
+      if (suggestionAbortController) {
+        suggestionAbortController.abort();
+      }
+
+      suggestionAbortController =
+        new AbortController();
+
+      searchSuggestions.innerHTML =
+        '<div class="suggestion-loading">Searching Infinium...</div>';
+
+      showSuggestionsBox();
+
+      const url =
+        getWikiApiBase() +
+        "?action=query" +
+        "&generator=prefixsearch" +
+        "&gpssearch=" + encodeURIComponent(cleanQuery) +
+        "&gpslimit=7" +
+        "&prop=pageimages%7Cpageterms" +
+        "&piprop=thumbnail" +
+        "&pithumbsize=120" +
+        "&pilimit=7" +
+        "&wbptterms=description" +
+        "&redirects=1" +
+        "&format=json" +
+        "&origin=*";
+
+      try {
+        const response =
+          await fetch(
+            url,
+            {
+              signal:
+                suggestionAbortController.signal
+            }
+          );
+
+        if (!response.ok) {
+          throw new Error("Suggestion request failed.");
+        }
+
+        const data =
+          await response.json();
+
+        const pages =
+          Object.values(
+            data?.query?.pages || {}
+          )
+          .sort(function(a, b) {
+            return (
+              (a.index || 999) -
+              (b.index || 999)
+            );
+          });
+
+        renderSuggestions(pages);
+
+      } catch (error) {
+        if (error.name === "AbortError") {
+          return;
+        }
+
+        searchSuggestions.innerHTML =
+          '<div class="suggestion-empty">Suggestions are temporarily unavailable.</div>';
+
+        showSuggestionsBox();
+      }
+    }
+
+
+    function scheduleSuggestions() {
+      clearTimeout(suggestionTimer);
+
+      const query =
+        searchInput.value.trim();
+
+      if (!query) {
+        hideSuggestions();
+        return;
+      }
+
+      suggestionTimer =
+        setTimeout(
+          function() {
+            fetchLiveSuggestions(query);
+          },
+          220
+        );
+    }
+
+
+
+    async function searchInfinium(query) {
+      showEncyclopediaView();
+      const cleanQuery = String(query || "").trim();
+
+      if (!cleanQuery) {
+        return;
+      }
+
+      lastSearchQuery = cleanQuery;
+      recordSearch(cleanQuery);
+
+      searchInput.value = cleanQuery;
+      hideSuggestions();
+      searchArea.classList.add("show");
+      articleViewer.classList.remove("show");
+
+      searchTitle.textContent = 'Search results for “' + cleanQuery + '”';
+      searchMeta.textContent = "Searching...";
+      searchResults.innerHTML = '<div class="status-box">Searching Infinium...</div>';
+
+      searchArea.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+      const url =
+        getWikiApiBase() +
+        "?action=query" +
+        "&list=search" +
+        "&srsearch=" + encodeURIComponent(cleanQuery) +
+        "&srlimit=20" +
+        "&utf8=1" +
+        "&format=json" +
+        "&origin=*";
+
+      try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error("Search request failed.");
+        }
+
+        const data = await response.json();
+        const results = data?.query?.search || [];
+        const total = data?.query?.searchinfo?.totalhits || 0;
+
+        searchMeta.textContent = total.toLocaleString() + " matching articles";
+
+        if (!results.length) {
+          searchResults.innerHTML =
+            '<div class="status-box">No encyclopedia articles were found. Try a different search.</div>';
+          return;
+        }
+
+        const list = document.createElement("div");
+        list.className = "results-list";
+
+        results.forEach(function(result) {
+          const card = document.createElement("article");
+          card.className = "result-card";
+
+          const cleanSnippet = stripHtml(result.snippet || "");
+          const sourceUrl =
+            getWikiArticleBase() +
+            encodeURIComponent(result.title.replace(/ /g, "_"));
+
+          card.innerHTML =
+            '<h3>' + escapeHtml(result.title) + '</h3>' +
+            '<p>' + escapeHtml(cleanSnippet) + '…</p>' +
+            '<div class="result-actions">' +
+              '<a href="#" class="read-inside" data-title="' + escapeHtml(result.title) + '">Read in Infinium</a>' +
+              '<a href="' + sourceUrl + '" target="_blank" rel="noopener">View source</a>' +
+            '</div>';
+
+          list.appendChild(card);
+        });
+
+        searchResults.innerHTML = "";
+        searchResults.appendChild(list);
+
+        list.querySelectorAll(".read-inside").forEach(function(link) {
+          link.addEventListener("click", function(event) {
+            event.preventDefault();
+            loadArticle(link.dataset.title);
+          });
+        });
+
+      } catch (error) {
+        searchMeta.textContent = "Search unavailable";
+        searchResults.innerHTML =
+          '<div class="status-box">Infinium could not reach the encyclopedia service. Check your internet connection and try again.</div>';
+      }
+    }
+
+
+    async function loadArticle(title) {
+      showEncyclopediaView();
+
+      articleViewer.classList.add("show");
+      currentArticleTitle = title;
+      articleTitle.textContent = title;
+      articleExtract.textContent = "Loading article...";
+      articleMeta.textContent = languageName(getLanguage()) + " knowledge source";
+      articleImage.classList.remove("show");
+      articleImage.removeAttribute("src");
+      relatedArticles.innerHTML =
+        '<span class="dashboard-empty">Loading related topics...</span>';
+
+      updateSaveButton();
+      renderKnowledgePath(title);
+
+      articleViewer.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+      const url =
+        getWikiApiBase() +
+        "?action=query" +
+        "&prop=extracts%7Cpageimages%7Clinks" +
+        "&exintro=1" +
+        "&explaintext=1" +
+        "&redirects=1" +
+        "&piprop=thumbnail" +
+        "&pithumbsize=700" +
+        "&plnamespace=0" +
+        "&pllimit=8" +
+        "&titles=" + encodeURIComponent(title) +
+        "&format=json" +
+        "&origin=*";
+
+      try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error("Article request failed.");
+        }
+
+        const data = await response.json();
+        const pages = data?.query?.pages || {};
+        const page = Object.values(pages)[0];
+
+        const resolvedTitle = page?.title || title;
+
+        currentArticleTitle = resolvedTitle;
+        articleTitle.textContent = resolvedTitle;
+        articleExtract.textContent =
+          page?.extract ||
+          "A short introduction is not available for this article.";
+
+        const sourceTitle = resolvedTitle.replace(/ /g, "_");
+        sourceArticle.href =
+          getWikiArticleBase() + encodeURIComponent(sourceTitle);
+        sourceArticle.classList.remove("source-disabled");
+        sourceArticle.setAttribute("aria-disabled", "false");
+
+        articleMeta.textContent =
+          languageName(getLanguage()) +
+          " source · Viewed " +
+          new Date().toLocaleDateString();
+
+        const imageSource = page?.thumbnail?.source || "";
+
+        if (imageSource) {
+          articleImage.src = imageSource;
+          articleImage.alt = resolvedTitle;
+          articleImage.classList.add("show");
+        } else {
+          articleImage.classList.remove("show");
+          articleImage.removeAttribute("src");
+        }
+
+        renderKnowledgePath(resolvedTitle);
+        renderRelatedArticles(page?.links || []);
+        updateSaveButton();
+
+      } catch (error) {
+        articleExtract.textContent =
+          "Infinium could not load this article right now. Please try again.";
+
+        articleMeta.textContent = "Article unavailable";
+        renderRelatedArticles([]);
+      }
+    }
+
+
+
+
+    function browseCategory(query) {
+      searchInput.value = query;
+      hideSuggestions();
+
+      searchInfinium(query);
+
+      setTimeout(function() {
+        const searchArea =
+          document.getElementById("searchArea");
+
+        if (searchArea) {
+          searchArea.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
+        }
+      }, 80);
+    }
+
+
+    async function openRandomArticle() {
+      try {
+        const url =
+          getWikiApiBase() +
+          "?action=query" +
+          "&generator=random" +
+          "&grnnamespace=0" +
+          "&grnlimit=1" +
+          "&format=json" +
+          "&origin=*";
+
+        const response =
+          await fetch(url);
+
+        if (!response.ok) {
+          throw new Error(
+            "Could not load a random article."
+          );
+        }
+
+        const data =
+          await response.json();
+
+        const pages =
+          Object.values(
+            data?.query?.pages || {}
+          );
+
+        if (!pages.length) {
+          throw new Error(
+            "No random article was returned."
+          );
+        }
+
+        showEncyclopediaView();
+
+        loadArticle(
+          pages[0].title
+        );
+
+      } catch (error) {
+        showToast(
+          "Random article is temporarily unavailable."
+        );
+      }
+    }
+
+
+    searchInput.addEventListener("input", function() {
+      scheduleSuggestions();
+    });
+
+
+    searchInput.addEventListener("focus", function() {
+      if (
+        searchInput.value.trim() &&
+        !searchSuggestions.classList.contains("show")
+      ) {
+        scheduleSuggestions();
+      }
+    });
+
+
+    searchInput.addEventListener("keydown", function(event) {
+      const items =
+        searchSuggestions.querySelectorAll(".suggestion-item");
+
+      if (event.key === "ArrowDown" && items.length) {
+        event.preventDefault();
+        setActiveSuggestion(activeSuggestionIndex + 1);
+        return;
+      }
+
+      if (event.key === "ArrowUp" && items.length) {
+        event.preventDefault();
+        setActiveSuggestion(activeSuggestionIndex - 1);
+        return;
+      }
+
+      if (
+        event.key === "Enter" &&
+        activeSuggestionIndex >= 0 &&
+        currentSuggestions[activeSuggestionIndex]
+      ) {
+        event.preventDefault();
+        openSuggestion(
+          currentSuggestions[activeSuggestionIndex]
+        );
+        return;
+      }
+
+      if (event.key === "Escape") {
+        hideSuggestions();
+      }
+    });
+
+
+    document.addEventListener("click", function(event) {
+      if (!searchForm.contains(event.target)) {
+        hideSuggestions();
+      }
+    });
+
+
+    searchForm.addEventListener("submit", function(event) {
+      event.preventDefault();
+      searchInfinium(searchInput.value);
+    });
+
+
+    document.querySelectorAll("[data-search]").forEach(function(link) {
+      link.addEventListener("click", function(event) {
+        event.preventDefault();
+        searchInfinium(link.dataset.search);
+      });
+    });
+
+
+    closeArticle.addEventListener("click", function() {
+      articleViewer.classList.remove("show");
+    });
+  
+
+
+
+    window.addEventListener("click", function(event) {
+      closeAllModalsByBackdrop(event);
+    });
+
+
+    /* Initialize Infinium enhancements */
+    wireSectionNavigation();
+    wireSourceLink();
+    applySavedTheme();
+    applyReadingPreferences();
+    applyLanguageSetting();
+    updateAccountUI();
+    renderPersonalSections();
+    loadDailyKnowledge();
+    loadCategoryImages();
+    updateDotFromScroll();
+
+</script>
+
+</body>
+</html>
